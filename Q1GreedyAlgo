@@ -1,0 +1,200 @@
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <map>
+#include <list>
+#include <unordered_set>
+#include <memory>
+#include <cstdlib>
+#include <climits>
+#include <ctime>
+
+using namespace std;
+
+int findMinDeg(map<int,list<string>> dict){
+// find minimum degree in current graph
+    int minDeg=INT_MAX;
+    for(map<int,list<string>>::iterator pt=dict.begin();pt!=dict.end();pt++){
+        if((minDeg>pt->first)&&(!pt->second.empty()))
+            minDeg=pt->first;
+    }
+    return minDeg;
+}
+
+bool hasNode(list<string> ll, string obj){
+// determine if obj is in ll
+    for(list<string>::iterator pt=ll.begin();pt!=ll.end();pt++){
+        if (*pt==obj)
+            return true;
+    }
+    return false;
+}
+
+
+int findCurrDeg(map<int, list<string>> dict, string tarNode){
+// find current degree of tarNode
+    int deg=0;
+    map<int, list<string>>::iterator pt=dict.begin();
+    while((deg==0)&&(pt!=dict.end())){
+        if(hasNode(pt->second,tarNode)){
+            deg=pt->first;
+            break;
+        }
+        pt++;
+    }
+    return deg;
+}
+
+list<string> updateDictEntry(list<string> ll, string key){
+// remove key from ll
+    list<string>::iterator pt=ll.begin();
+    while((*pt)!=key){
+    pt++;
+    }
+    ll.erase(pt);
+    return ll;
+}
+
+
+int main(int argc, char *argv[])
+{                                          
+
+    // read graph info from file
+    // establish degree map
+    clock_t begin = clock();
+    ifstream inFile;
+    string x="";
+    inFile.open("chicago.txt");
+
+    map<string,int> degDictTmp;
+    unordered_set<string> nodes;
+    map<int,list<string>> degDict; // delta key,value=degree,nodes
+    unordered_set<string> edges; //edge information
+
+
+    do{
+        inFile>>x;
+    }while(!(('0'<=x[0])&&(x[0]<='9')));
+
+    string a=x;
+    inFile>>x;
+    string b=x;
+    cout<<a<<' '<<b<<endl;
+    string newEdge=a+' '+b;
+    edges.insert(newEdge);
+    nodes={a,b};
+    degDictTmp[a]=1;
+    degDictTmp[b]=1;
+
+    // count simultaneously the degree of each node
+    int numNode=2;
+    while(inFile>>a>>b){
+        if (!degDictTmp.count(a)){
+            degDictTmp[a]=1;
+            numNode+=1;
+        }
+        else
+            degDictTmp[a]+=1;
+        if (!degDictTmp.count(b)){
+            degDictTmp[b]=1;
+            numNode+=1;
+        }
+        else
+            degDictTmp[b]+=1;
+        string newEdge=a+' '+b;
+        edges.insert(newEdge);
+        if(!nodes.count(a))
+            nodes.insert(a);
+        if(!nodes.count(b))
+            nodes.insert(b);
+    }
+
+
+    // estalish degDict with degDictTmp
+     for(int i=1;i<=numNode;++i)
+         degDict[i]=list<string>();
+
+     auto pt=degDictTmp.begin();
+     while(pt!=degDictTmp.end()){
+         degDict[pt->second].push_back(pt->first);
+         pt++;
+     }
+
+     cout<<"-------------"<<endl;
+
+     int inputSize=edges.size()+nodes.size();
+     cout<<degDict.size()<<endl;
+   //  for(auto pt=degDict.begin();pt!=degDict.end();pt++){
+   //      cout<<pt->first<<' '<<pt->second.size()<<endl;
+   //  }
+
+
+    // iteration
+    cout<<"*******"<<endl;
+    double maxDensity=0.0;
+    int roundCnt=0;
+    unordered_set<string> densestGraph=edges;
+    do{
+        double newDensity=edges.size()/nodes.size();
+        if(newDensity>maxDensity){
+            maxDensity=newDensity;
+            densestGraph=edges;
+        }
+        int minDeg=findMinDeg(degDict);
+        list<string> rmNodes=degDict[minDeg];
+        for(auto &node: rmNodes){
+            nodes.erase(node);
+        }
+        degDict.erase(minDeg);
+        degDict[minDeg]=list<string>();
+        roundCnt+=1;
+        if(nodes.size()>0){
+            for(unordered_set<string>::iterator p=nodes.begin();p!=nodes.end();p++){
+                int reduceDeg=0;
+                for(auto &node: rmNodes){
+                    string edge1=*p+' '+node;
+                    string edge2=node+' '+*p;
+                    reduceDeg+=edges.erase(edge1);
+                    reduceDeg+=edges.erase(edge2);
+                }
+                if(reduceDeg==0)
+                    continue;
+                else{
+                    int currDeg=findCurrDeg(degDict,*p);
+                    int newDeg=currDeg-reduceDeg;
+                    if(newDeg>0){
+                        degDict[newDeg].push_back(*p);
+                        list<string> tmp=updateDictEntry(degDict[currDeg],*p);
+                        degDict[currDeg]=tmp;
+                    }
+                    else
+                        // A completer
+
+                }
+             }
+        }
+
+        cout<<"There are "<<nodes.size()<<" nodes left after round "<<roundCnt<<endl;
+        cout<<"There are "<<edges.size()<<" edges left after round "<<roundCnt<<endl;
+        cout<<endl;
+
+
+     }while(nodes.size()!=0);
+
+
+
+    ofstream outfile;
+    outfile.open("chicago_out.txt");
+    outfile<<"Initial size: "<<inputSize<<endl;
+    outfile<<"The densest subgraph has a density of "<<maxDensity<<endl;
+    clock_t end = clock();
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    cout<<"Running time: "<<elapsed_secs<<endl;
+
+    for(unordered_set<string>::iterator p=edges.begin();p!=edges.end();p++){
+       outfile<<(*p)<<endl;
+    }
+
+
+    return 0;
+}
