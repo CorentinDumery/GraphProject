@@ -1,0 +1,217 @@
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <map>
+#include <list>
+#include <unordered_set>
+#include <memory>
+#include <cstdlib>
+#include <climits>
+#include <ctime>
+#include <vector>
+
+using namespace std;
+
+int findMinDeg(map<int,list<string>> dict){
+// find minimum degree in current graph
+    int minDeg=INT_MAX;
+    for(map<int,list<string>>::iterator pt=dict.begin();pt!=dict.end();pt++){
+        if((minDeg> pt->first)&&(!pt->second.empty()))
+            minDeg=pt->first;
+    }
+    return minDeg;
+}
+
+bool hasNode(list<string> ll, string tarNode){
+// determine if the target node is in ll
+    for(list<string>::iterator pt=ll.begin();pt!=ll.end();pt++){
+        if (*pt==tarNode)
+            return true;
+    }
+    return false;
+}
+
+int findCurrDeg(map<int, list<string>> dict, string tarNode){
+// find current degree of the target node "tarNode"
+    int deg=0;
+    map<int, list<string>>::iterator pt=dict.begin();
+    while((deg==0)&&(pt!=dict.end())){
+        if(hasNode(pt->second,tarNode)){
+            deg=pt->first;
+            break;
+        }
+        pt++;
+    }
+    return deg;
+}
+
+list<string> updateDictEntry(list<string> ll, string key){
+// remove target node "tarNode" from the node list "ll"
+    list<string>::iterator pt=ll.begin();
+    while((*pt)!=key){
+        pt++;
+    }
+    ll.erase(pt);
+    return ll;
+}
+
+int main()
+{
+    // start timer
+    clock_t startTime=clock();
+
+    // read original graph from file
+    ifstream inFile;
+    string x="";
+    inFile.open("amazon.txt");
+
+    map<string,int> degDictTmp;  // key, value = node, its degree
+    unordered_set<string> nodes; // all nodes in the current graph
+    map<int,list<string>> degDict; // "delta" in problem statement,  key, value=degree, nodes, a degree dictionary
+    unordered_set<string> edges; // all edges in the current graph
+
+
+
+    // filter file header (non edge information)
+    do{
+        inFile>>x;
+    }while(!(('0'<=x[0])&&(x[0]<='9')));
+
+    // read edges one by one from input file
+    string a=x;
+    inFile>>x;
+    string b=x;
+    string newEdge=a+' '+b;
+    edges.insert(newEdge);
+    nodes={a,b};
+    degDictTmp[a]=1;
+    degDictTmp[b]=1;
+
+    // count simultaneously the degree of each node
+    int numNode=2;
+    while(inFile>>a>>b){
+        if (!degDictTmp.count(a)){
+            degDictTmp[a]=1;
+            numNode+=1;
+        }
+        else
+            degDictTmp[a]+=1;
+        if (!degDictTmp.count(b)){
+            degDictTmp[b]=1;
+            numNode+=1;
+        }
+        else
+            degDictTmp[b]+=1;
+        string newEdge=a+' '+b;
+        edges.insert(newEdge);
+        if(!nodes.count(a))
+            nodes.insert(a);
+        if(!nodes.count(b))
+            nodes.insert(b);
+    }
+
+    // estalish degDict(mapping from degree to nodes) with degDictTmp(mapping from node to degree)
+    for(int i=1;i<=numNode;++i)
+        degDict[i]=list<string>();
+
+    auto pt=degDictTmp.begin();
+    while(pt!=degDictTmp.end()){
+        degDict[pt->second].push_back(pt->first);
+        pt++;
+    }
+
+
+    // size of the original graph
+    int inputSize=edges.size()+nodes.size();
+
+    // iteration, delete the nodes with minimal degrees and relevant edges in the current graph
+    float maxDensity=0.0;
+    int roundCnt=0;
+    unordered_set<string> densestGraph=edges;
+    do{
+        // update densest subgraph
+        float newDensity=float(edges.size())/nodes.size();
+        if(newDensity>maxDensity){
+            maxDensity=newDensity;
+            densestGraph=edges;
+        }
+
+        // find minimal node degree in current graph
+        int minDeg=findMinDeg(degDict);
+
+
+        // find all nodes with the minimal degree
+        list<string> rmNodes=degDict[minDeg];
+        for(auto &node: rmNodes){
+            nodes.erase(node);
+        }
+
+        // clear the entry corresponding to the minimal degree in "delta" and reset it to an empty node list
+        degDict.erase(minDeg);
+        degDict[minDeg]=list<string>();
+
+        //  delete all edges between removed nodes
+        for(auto &n1: rmNodes){
+            for(auto &n2: rmNodes){
+                string edge1=n1+' '+n2;
+                string edge2=n1+' '+n1;
+                edges.erase(edge1);
+                edges.erase(edge2);
+            }
+        }
+
+        // delete edges with one extremity being a removed node and the other an existing node
+        // upgrade the degree of all existing nodes
+        // if, after edge removal, an existing node has a degree of 0, remove the node as well
+        if(nodes.size()>0){
+            for(unordered_set<string>::iterator p=nodes.begin();p!=nodes.end();p++){
+                int reduceDeg=0;
+                for(auto &node: rmNodes){
+                    string edge1=*p+' '+node;
+                    string edge2=node+' '+*p;
+                    reduceDeg+=edges.erase(edge1);
+                    reduceDeg+=edges.erase(edge2);
+                }
+                if(reduceDeg==0)
+                    continue;
+                else{
+                    int currDeg=findCurrDeg(degDict,*p);
+                    int newDeg=currDeg-reduceDeg;
+                    list<string> tmp=updateDictEntry(degDict[currDeg],*p);
+                    degDict[currDeg]=tmp;
+                    if (newDeg>0){
+                        degDict[newDeg].push_back(*p);
+                    }
+                    else
+                        nodes.erase(*p);
+                }
+            }
+        }
+
+        // edge, node information of the current graph
+        roundCnt+=1;
+        cout<<nodes.size()<<" nodes left after round "<<roundCnt<<endl;
+        cout<<edges.size()<<" edges left after round "<<roundCnt<<endl;
+        cout<<endl;
+
+    }while(nodes.size()!=0);
+
+
+    ofstream outfile;
+    outfile.open("amazon_out.txt");
+
+     // output the running time
+    clock_t endTime=clock();
+    double elapsed_secs=double(endTime-startTime)/CLOCKS_PER_SEC;
+    outfile<<"Running time: "<<elapsed_secs<<endl;
+
+    // output the size of the initial graph, the densest subgraph and its edges
+    outfile<<"Initial size: "<<inputSize<<endl;
+    outfile<<"The densest subgraph has a density of "<<maxDensity<<endl;
+
+    for(unordered_set<string>::iterator p=densestGraph.begin();p!=densestGraph.end();p++){
+        outfile<<(*p)<<endl;
+    }
+
+    return 0;
+}
