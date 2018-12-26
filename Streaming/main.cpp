@@ -12,83 +12,43 @@ using namespace std;
 
 /* ONE PASS :
 
+    inFile.close(); //maybe there's a better way to do that
+    inFile.open(fileName);
+
     do{
         inFile>>x;
     }while(!(('0'<=x[0])&&(x[0]<='9')));
 
     inFile>>a;
     inFile>>b;
-    if (printing) cout<<"Reading edge "<<a<<' '<<b<<endl;
+
 
     while(inFile>>a>>b){
-        if (printing) cout<<"Reading edge "<<a<<' '<<b<<endl;
+
     }
 
 */
-
-/*
-int findMinDeg(map<int,vector<string>> dict){
-// find minimum degree in current graph
-    int minDeg=INT_MAX;
-    for(map<int,vector<string>>::iterator pt=dict.begin();pt!=dict.end();pt++){
-        if(minDeg> pt->first)
-            minDeg=pt->first;
-    }
-    return minDeg;
-}
-*/
-/*
-bool hasNode(vector<string> ll, string obj){
-// determine if obj is in ll
-    for(vector<string>::iterator pt=ll.begin();pt!=ll.end();pt++){
-        if (*pt==obj)
-            return true;
-    }
-    return false;
-}
-*/
-/*
-int findCurrDeg(map<int, vector<string>> dict, string tarNode){
-// find current degree of tarNode
-    int deg=0;
-    map<int, vector<string>>::iterator pt=dict.begin();
-    while((deg==0)&&(pt!=dict.end())){
-        if(hasNode(pt->second,tarNode)){
-            deg=pt->first;
-            break;
-        }
-        pt++;
-    }
-    return deg;
-}
-*/
-/*
-vector<string> updateDictEntry(vector<string> ll, string key){
-// remove key from ll
-    vector<string>::iterator pt=ll.begin();
-    while((*pt)!=key){
-        pt++;
-    }
-    ll.erase(pt);
-    return ll;
-}
-*/
-
 
 void myCopy(bool tab1[],bool tab2[],int n){ //copies tab2 into tab1 for n elements
     for (int i=0;i<n;i++) tab1[i]=tab2[i];
 }
 
+void printTab(int tab[],int size,string name){
+    for (int i=0;i<size;i++){
+         cout << name <<"["<<i<<"] = "<<tab[i]<<endl;
+    }
+}
+
 int main()
 {
-    // read graph info from file
-    // establish degree map
 
     string fileName = "chicago.txt";
+    //fileName = "contiguous.txt";
+    fileName = "astro.txt";
 
-    bool printing = false; //Do you want me to print EVERYTHING for you ?
+    bool printing = true; //Do you want me to print debug info for you ?
 
-    float epsilon = 1000.5;
+    float epsilon = 0.8;
 
     ifstream inFile;
     inFile.open(fileName);
@@ -106,15 +66,15 @@ int main()
     int maxId = 0; //hypothesis: the nodes' names are positive numbers
 
     int a,b;
-    inFile>>a;
+    string str = x;
+    a = stoi(x);
     maxId = a;
     inFile>>b;
     if (b>maxId) maxId=b;
     numberOfEdges +=1;
-    if (printing) cout<<"Edge "<<a<<' '<<b<<endl;
 
     while(inFile>>a>>b){
-        if (printing) cout<<"Edge "<<a<<' '<<b<<endl;
+
         if (a>maxId) maxId = a;
         if (b>maxId) maxId = b;
         numberOfEdges += 1;
@@ -122,6 +82,7 @@ int main()
 
     maxId += 1; //the last element should be included in the tabs
 
+    cout << "maxId is "<<maxId<<endl;
     //Initializing tabs. I'll need another pass.
 
     int degree[maxId];
@@ -139,71 +100,94 @@ int main()
         inFile>>x;
     }while(!(('0'<=x[0])&&(x[0]<='9')));
 
-    inFile>>a;
+    str = x;
+    a = stoi(x);
     inFile>>b;
-    if (printing) cout<<"Reading edge "<<a<<' '<<b<<endl;
+
+    cout<<"First edge read is "<<a<<" "<<b<<endl;
+
+    degree[a]+=1;
+    degree[b]+=1;
+
 
     while(inFile>>a>>b){
-        if (printing) cout<<"Reading edge "<<a<<' '<<b<<endl;
         degree[a]+=1;
         degree[b]+=1;
     }
-
+    cout<<"Last edge read is "<<a<<" "<<b<<endl;
 
     //Now we can begin the Streaming Algorithm for Densest Subgraph
 
     int nEdges=numberOfEdges; //number of edges left
+    cout << "Initial n of edges"<<nEdges<<endl;
+
     int nVertices=maxId; //number of vertices left
 
-    float currentDensity = nEdges/nVertices;
+    cout << "Initial n of vertices"<<nVertices<<endl;
+
+
+    float currentDensity = (float) nEdges /(float) nVertices;
+    cout << "Initial d"<<currentDensity<<endl;
 
 
     bool answer[maxId];
     myCopy(answer,isIn,maxId ); //copies tab2 into tab1 for n elements
     float bestDensity = currentDensity;
+    cout << "Initial density "<<bestDensity<<endl;
 
     while (numberOfEdges>0){
         for (int i=0;i<maxId;i++){
-
+            /*/
+            if (printing) cout << "i "<<i<<endl;
+            if (printing) cout << "isIn "<<isIn[i]<<endl;
+            if (printing) cout << "Current density "<<currentDensity<<endl;
+            if (printing) cout << "Degree condition "<<(degree[i]<=2*(1+epsilon)*currentDensity)<<endl;
+            //*/
             if (isIn[i] && degree[i]<=2*(1+epsilon)*currentDensity){
-
+                if (printing) cout << "I'm removing node "<<i<<endl;
                 //removing this node, doing a pass to find its neighbors and decrease their degree
                 isIn[i]=false;
                 nVertices -= 1;
+
+                inFile.close(); //maybe there's a better way to do that
+                inFile.open(fileName);
 
                 do{
                     inFile>>x;
                 }while(!(('0'<=x[0])&&(x[0]<='9')));
 
-                inFile>>a;
-                inFile>>b;
-                if (printing) cout<<"Reading edge "<<a<<' '<<b<<endl;
+                str = x;
+                a = stoi(x);
 
-                if (a==i && isIn[b]) {degree[b] -= 1; nEdges-=1;}
-                if (b==i && isIn[a]) {degree[a] -= 1; nEdges-=1;}
+                inFile>>b;
+
+                if (a==i && isIn[b]) {degree[b] = degree[b]-1; degree[a]=degree[a]-1; nEdges-=1;}
+                if (b==i && isIn[a]) {degree[b] = degree[b]-1; degree[a]=degree[a]-1; nEdges-=1;}
 
                 while(inFile>>a>>b){
-                    if (printing) cout<<"Reading edge "<<a<<' '<<b<<endl;
-                    if (a==i && isIn[b]) {degree[b] -= 1; nEdges-=1;}
-                    if (b==i && isIn[a]) {degree[a] -= 1; nEdges-=1;}
+                    if (i==3 && (a==3 || b==3)) cout<<"Found "<<a<<" "<<b<<endl;
+                    if (a==i && isIn[b]) {degree[b] = degree[b]-1; degree[a]=degree[a]-1; nEdges-=1;}
+                    if (b==i && isIn[a]) {degree[b] = degree[b]-1; degree[a]=degree[a]-1; nEdges-=1;}
                 }
             }
         }
 
         if (nVertices == 0) break;
-        currentDensity = nEdges/nVertices;
+        currentDensity = (float) nEdges/(float) nVertices;
         if (currentDensity>bestDensity) {
-            cout<<"I found a better graph"<<endl;
+
             bestDensity = currentDensity;
             myCopy(answer,isIn,maxId);
+            cout<<"I found a better graph with density "<<bestDensity<<endl;
         }
 
+        /*
         cout<<"Nodes left after this round : "<<nVertices<<endl;
         cout<<"Edges left after this round : "<<nEdges<<endl;
-
+        //*/
     }
 
-
+    printTab(degree,maxId,"final degree");
     for (int i=0;i<maxId;i++){
         if (answer[i]) cout << "Node "<<i<<" is included"<<endl;
     }
