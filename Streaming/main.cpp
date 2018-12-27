@@ -19,7 +19,8 @@ using namespace std;
         inFile>>x;
     }while(!(('0'<=x[0])&&(x[0]<='9')));
 
-    inFile>>a;
+    string str = x;
+    a = stoi(x);
     inFile>>b;
 
 
@@ -41,14 +42,18 @@ void printTab(int tab[],int size,string name){
 
 int main()
 {
+    clock_t begin = clock();
 
     string fileName = "chicago.txt";
-    //fileName = "contiguous.txt";
+    fileName = "contiguous.txt";
     fileName = "astro.txt";
+    fileName = "hamster.txt";
+    fileName = "power.txt";
+    fileName = "facebook.txt";
 
     bool printing = true; //Do you want me to print debug info for you ?
 
-    float epsilon = 0.8;
+    float epsilon = 0.1;
 
     ifstream inFile;
     inFile.open(fileName);
@@ -193,68 +198,11 @@ int main()
     }
     cout << "Final density "<<bestDensity<<endl;
 
+    clock_t end = clock();
+    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+    cout<<"This task took me "<<elapsed_secs<<" s"<<endl;
+    cout<<"And the input size was : maxId+numberOfEdges = "<<(maxId-1)+numberOfEdges<<endl;
 
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-    nodes={a,b};
-    degDictTmp[a]=1;
-    degDictTmp[b]=1;
-
-    // count simultaneously the degree of each node
-    int numNode=2;
-    while(inFile>>a>>b){
-        cout<<a<<' '<<b<<endl;
-        if (!degDictTmp.count(a)){
-            degDictTmp[a]=1;
-            numNode+=1;
-        }
-        else
-            degDictTmp[a]+=1;
-        if (!degDictTmp.count(b)){
-            degDictTmp[b]=1;
-            numNode+=1;
-        }
-        else
-            degDictTmp[b]+=1;
-        if(!nodes.count(a))
-            nodes.insert(a);
-        if(!nodes.count(b))
-            nodes.insert(b);
-    }
-
-    cout<<"------------"<<endl;
-    // estalish degDict with degDictTmp
-    for(int i=1;i<=numNode;++i)
-        degDict[i]=vector<string>();
-
-    auto pt=degDictTmp.begin();
-    while(pt!=degDictTmp.end()){
-        degDict[pt->second].push_back(pt->first);
-        cout<<pt->first<<' '<<pt->second<<endl;
-        pt++;
-    }
-
-    cout<<"-------------"<<endl;
-
-
-    cout<<nodes.size()<<endl;
-    cout<<degDict.size()<<endl;
-    for(auto pt=degDict.begin();pt!=degDict.end();pt++){
-        cout<<pt->first<<' '<<pt->second.size()<<endl;
-    }
-
-*/
 
     cout<<"Reached ending safely."<<endl;
     return 0;
