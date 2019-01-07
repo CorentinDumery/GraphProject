@@ -71,5 +71,6 @@ In this section we will try to find the densest subgraph without using more than
 ### Results - Running time
 
 [tester la consommation de mémoire avec valgrind]
+[ou tout simplement avec une variable count incrémentée à chaque allocation mémoire !!!!]
 
 ### Results - Resulting subgraphs
