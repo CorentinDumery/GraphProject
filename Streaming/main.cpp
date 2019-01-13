@@ -10,6 +10,8 @@
 
 using namespace std;
 
+int memoryCount=0;
+
 /* ONE PASS :
 
     inFile.close(); //maybe there's a better way to do that
@@ -45,15 +47,17 @@ int main()
     clock_t begin = clock();
 
     string fileName = "chicago.txt";
-    fileName = "contiguous.txt";
+    //fileName = "contiguous.txt";
     fileName = "astro.txt";
-    fileName = "hamster.txt";
-    fileName = "power.txt";
-    fileName = "facebook.txt";
+    //fileName = "hamster.txt";
+    //fileName = "power.txt";
+    //fileName = "facebook.txt";
+
 
     bool printing = true; //Do you want me to print debug info for you ?
 
     float epsilon = 0.1;
+
 
     ifstream inFile;
     inFile.open(fileName);
@@ -69,6 +73,7 @@ int main()
 
     int numberOfEdges = 0;
     int maxId = 0; //hypothesis: the nodes' names are positive numbers
+    memoryCount +=2*sizeof(int);
 
     int a,b;
     string str = x;
@@ -92,6 +97,7 @@ int main()
 
     int degree[maxId];
     bool isIn[maxId];
+    memoryCount +=maxId*(sizeof(int)+sizeof(bool));
 
     for (int i=0;i<maxId;i++){
         degree[i]=0;
@@ -132,10 +138,11 @@ int main()
 
 
     float currentDensity = (float) nEdges /(float) nVertices;
-    cout << "Initial d"<<currentDensity<<endl;
+    cout << "Initial d "<<currentDensity<<endl;
 
 
     bool answer[maxId];
+    memoryCount +=maxId*sizeof(bool);
     myCopy(answer,isIn,maxId ); //copies tab2 into tab1 for n elements
     float bestDensity = currentDensity;
     cout << "Initial density "<<bestDensity<<endl;
@@ -202,6 +209,10 @@ int main()
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     cout<<"This task took me "<<elapsed_secs<<" s"<<endl;
     cout<<"And the input size was : maxId+numberOfEdges = "<<(maxId-1)+numberOfEdges<<endl;
+    cout<<"Memory used to store graph and answer : "<<memoryCount<<" bytes"<< endl;
+
+    cout<<sizeof(bool)<< endl;
+
 
 
     cout<<"Reached ending safely."<<endl;
