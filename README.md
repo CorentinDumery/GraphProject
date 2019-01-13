@@ -60,17 +60,28 @@ In this section we will try to find the densest subgraph without using more than
 
 ### Description of the algorithm
 - We set an arbitrary value for epsilon.
-- [read the graph ?]
+- We read the graph once to determine its number of edges and nodes. (Without storing the edges because of the memory use constraint !)
 - Just like in the previous section, we create an output value initialized as the initial graph.
 - Again, for as long as our graph contains at least one edge :
- - [ ]
+ - We remove every node that has a degree lower than 2(1+epsilon)*density(G). For every removal, we read the graph so that we can decrease the degree of the node's former neighbors.
  - If the resulting graph has a better density than the current output value, we replace our output value with this graph.
 
+### Results - Memory use
 
+[graph or tab]
+
+By incrementing a value everytime a new slot of memory is reserved, we can measure memory use. The results show that it is proportional to the number of nodes, but not to the input size which includes the number of edges. The constraint on memory use is satisfied.
 
 ### Results - Running time
 
-[tester la consommation de mémoire avec valgrind]
-[ou tout simplement avec une variable count incrémentée à chaque allocation mémoire !!!!]
+[graph]
 
-### Results - Resulting subgraphs
+
+
+### Results - Running time and density for different epsilons
+
+[tab]
+
+There seems to be little difference in processing time. This is probably explained by the fact that the algorithm has to remove every node one by one and read the graph every time indepedently of the value of epsilon. Perhaps if we implemented a better way to remove the nodes, by doing only one pass per iteration to remove all the selected nodes at the same time, we would find a better running time with higher epsilon.
+In general, density seems to decrease when epsilon increases. The value for epsilon = 0.4 can probably be explained by the fact that the number of nodes removed depends on the epsilon value, so based on that value the algorithm could "skip" the right solution and remove too many nodes.
+In order to get consistent results on a given graph, it would probably be important to test different epsilon values. Furthermore, our approximation guarantee certifies that the densest subgraph's density is not greater than the value of 2(1+epsilon)*output_density found with this algorithm. For this reason, even if an epsilon gives us a terrible output (with a very low density), it will provide us with a good idea of the maximum density we can hope to find. In this case, the lowest value found is for epsilon = 0.2 and certifies that the densest subgraph's density is below 5.12 .

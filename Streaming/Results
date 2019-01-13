@@ -9,25 +9,25 @@ input size | time
 216821 | 489.66 
 
 
-different epsilons, with power.txt (11535)
-epsilon | time | density
-0.1     | 4.15 | 2.69
-0.2     | 4.12 | 2.55
-0.4     | 4.19 | 1.85
-0.6     | 4.20 | 2.46
-0.8     | 4.17 | 2.46
+different epsilons, with power.txt (input size = 11535)
+epsilon | time | density | 2(1+epsilon)*density
+0.1     | 4.15 | 2.69    | 5.918
+0.2     | 4.12 | 2.55    | 5.120
+0.4     | 4.19 | 1.85    | 5.180
+0.6     | 4.20 | 2.46    | 7.872
+0.8     | 4.17 | 2.46    | 8.856
 
 ==> Little difference in processing time, probably because the algorithm will have to remove every node one by one indepedently
 ==> Density seems to decrease when epsilon increases, but not really.. Maybe it's because by chance these epsilon values brought the algorithm to the right solution, whereas the 0.4 epsilon skipped it 
 
 Memory used
-input size | Bytes (used to store graph and answer)
-156    | 304
-2765   | 8812
-5869   | 17342
-11535  | 29660
-19057  | 14566
-216821 | 112640
+input size | Number of nodes | Bytes (used to store graph and answer)
+156    | 49    | 304
+2765   | 1467  | 8812
+5869   | 2888  | 17342
+11535  | 4941  | 29660
+19057  | 2426  | 14566
+216821 | 18771 | 112640
 
 Remark : The input size can be greater than the number of bytes used. This is normal, since we are not keeping edges in memory and input size is at least equal to the number of edges.
 We can also notice that the number of bytes is not exactly proportional to the input size. It is proportional to the number of nodes, but not the number of edges, that's why the memory/input size rate can vary based on the number of edges per vertex.

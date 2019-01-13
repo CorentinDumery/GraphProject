@@ -12,25 +12,6 @@ using namespace std;
 
 int memoryCount=0;
 
-/* ONE PASS :
-
-    inFile.close(); //maybe there's a better way to do that
-    inFile.open(fileName);
-
-    do{
-        inFile>>x;
-    }while(!(('0'<=x[0])&&(x[0]<='9')));
-
-    string str = x;
-    a = stoi(x);
-    inFile>>b;
-
-
-    while(inFile>>a>>b){
-
-    }
-
-*/
 
 void myCopy(bool tab1[],bool tab2[],int n){ //copies tab2 into tab1 for n elements
     for (int i=0;i<n;i++) tab1[i]=tab2[i];
@@ -48,13 +29,11 @@ int main()
 
     string fileName = "chicago.txt";
     //fileName = "contiguous.txt";
-    fileName = "astro.txt";
-    //fileName = "hamster.txt";
-    //fileName = "power.txt";
-    //fileName = "facebook.txt";
+    //fileName = "astro.txt";
+    fileName = "hamster.txt";
+    fileName = "power.txt";
+    fileName = "facebook.txt";
 
-
-    bool printing = true; //Do you want me to print debug info for you ?
 
     float epsilon = 0.1;
 
@@ -104,7 +83,7 @@ int main()
         isIn[i]=true;
     }
 
-    inFile.close(); //maybe there's a better way to do that
+    inFile.close();
     inFile.open(fileName);
 
     do{
@@ -149,19 +128,14 @@ int main()
 
     while (numberOfEdges>0){
         for (int i=0;i<maxId;i++){
-            /*/
-            if (printing) cout << "i "<<i<<endl;
-            if (printing) cout << "isIn "<<isIn[i]<<endl;
-            if (printing) cout << "Current density "<<currentDensity<<endl;
-            if (printing) cout << "Degree condition "<<(degree[i]<=2*(1+epsilon)*currentDensity)<<endl;
-            //*/
+
             if (isIn[i] && degree[i]<=2*(1+epsilon)*currentDensity){
-                if (printing) cout << "I'm removing node "<<i<<endl;
+                cout << "I'm removing node "<<i<<endl;
                 //removing this node, doing a pass to find its neighbors and decrease their degree
                 isIn[i]=false;
                 nVertices -= 1;
 
-                inFile.close(); //maybe there's a better way to do that
+                inFile.close();
                 inFile.open(fileName);
 
                 do{
@@ -208,6 +182,7 @@ int main()
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
     cout<<"This task took me "<<elapsed_secs<<" s"<<endl;
+    cout<<"Number of nodes = "<<(maxId-1)<<endl;
     cout<<"And the input size was : maxId+numberOfEdges = "<<(maxId-1)+numberOfEdges<<endl;
     cout<<"Memory used to store graph and answer : "<<memoryCount<<" bytes"<< endl;
 
