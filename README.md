@@ -8,13 +8,9 @@ It was coded in C++ by Dongrui LU and Corentin DUMERY. There is also a python fi
 
 
 
-"You should also discuss whether the results are expected or not and if not motivate why you might have obtained different results than what you had expected. Any “interesting findings” will also be appreciated.""
-
 ## Part 1 : Greedy Algorithm
 
 ### Data Structures
-
-[structures suivantes à modifier]
 
 map<string,int> degDictTmp;
 unordered_set<string> nodes;
@@ -24,8 +20,6 @@ unordered_set<string> edges; //edge information
 According to cplusplus.com, unordered_set::insert has a constant complexity, and unordered_set::erase has the same complexity as long as you erase a constant number of elements.
 
 According to cppreference.com, map::insert and map::operator[] have a logarithmic complexity. Ultimately, this could be improved by using a data structure which can be accessed in constant time, but the logarithmic factor has very little weight.
-
-How to improve data structures : [ ... ]
 
 ### Description of the algorithm
 - First, we have to read the input file.
@@ -42,17 +36,8 @@ How to improve data structures : [ ... ]
 ### Results - Running time
 To test the results, the c++ program writes in a text file how much time it takes to process graphs with varying size. This text file is then read by a python program which plots the time taken depending on the size of the graph. From there, all we need to do is a linear regression and the quality of our program will be determined by the coefficient of determination r_squared. The closer r_squared is to 1, the better the implementation is.
 
-[...]
-
-### Results - Resulting subgraphs
-[...] Report the density of the subgraphs you found as well the number of nodes in each of the
-subgraphs.
-
-
 
 ## Part 2 : Streaming Algorithm
-
-"While reading the file you can store some information in main memory, however, you can only use O(n log n) bits in main memory. In particular, for each node you can store in main memory only its (current) degree and not the edges incident to the node."
 
 ### Data Structures
 
@@ -68,19 +53,9 @@ In this section we will try to find the densest subgraph without using more than
 
 ### Results - Memory use
 
-[graph or tab]
-
 By incrementing a value everytime a new slot of memory is reserved, we can measure memory use. The results show that it is proportional to the number of nodes, but not to the input size which includes the number of edges. The constraint on memory use is satisfied.
 
-### Results - Running time
-
-[graph]
-
-
-
 ### Results - Running time and density for different epsilons
-
-[tab]
 
 There seems to be little difference in processing time. This is probably explained by the fact that the algorithm has to remove every node one by one and read the graph every time indepedently of the value of epsilon. Perhaps if we implemented a better way to remove the nodes, by doing only one pass per iteration to remove all the selected nodes at the same time, we would find a better running time with higher epsilon.
 In general, density seems to decrease when epsilon increases. The value for epsilon = 0.4 can probably be explained by the fact that the number of nodes removed depends on the epsilon value, so based on that value the algorithm could "skip" the right solution and remove too many nodes.
